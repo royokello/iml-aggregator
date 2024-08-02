@@ -12,5 +12,5 @@ pip install Pillow
 Once Pillow is installed, you can run the script from the command line by specifying the source directory where the images are located and the output directory where the PNG files will be saved. Use the following command:
 
 `
-python main.py --source_dir "path/to/source_directory" --output_dir "path/to/output_directory" --resolution 256
+python main.py -s "path/to/source_directory" -o "path/to/output_directory" -r 256
 `

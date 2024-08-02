@@ -2,7 +2,7 @@ import argparse
 import os
 from PIL import Image
 
-def main(source_dir, output_dir, max_resolution=None):
+def main(source_dir: str, output_dir: str, resolution: int):
     """
     Retrieves all image files from a specified directory and its subdirectories, converts them to PNG format, 
     and saves them to a designated output folder with names as sequential integers.
@@ -13,26 +13,36 @@ def main(source_dir, output_dir, max_resolution=None):
     # Initialize a counter for the output file names
     file_counter = 1
 
-    # Walk through all directories and files in the source directory
     for root, dirs, files in os.walk(source_dir):
         for file in files:
             try:
                 file_path = os.path.join(root, file)
-                # Open the image file
                 with Image.open(file_path) as img:
+                    # Convert the image to RGB mode if it's not already
+                    if img.mode != 'RGB':
+                        img = img.convert('RGB')
 
-                    if max_resolution:
-                        img.thumbnail((max_resolution, max_resolution), Image.LANCZOS)
-                    # Construct the output file path with the counter
+                    # Resize the image to fit within the resolution while maintaining aspect ratio
+                    img.thumbnail((resolution, resolution), Image.LANCZOS) # type: ignore
+
+                    # Create a new square image with white background
+                    new_img = Image.new('RGB', (resolution, resolution), (255, 255, 255))
+
+                    # Calculate position to paste the original image
+                    paste_position = ((resolution - img.width) // 2, (resolution - img.height) // 2)
+
+                    # Paste the original image onto the new square image
+                    new_img.paste(img, paste_position)
+
+                    # Save the image
                     output_file_path = os.path.join(output_dir, f"{file_counter}.png")
-                    # Convert to PNG and save in the output directory
-                    # img.convert('RGBA').save(output_file_path, 'PNG')
-                    img.save(output_file_path, 'PNG')
-                    print(f"Converted and saved: {file_path} as {output_file_path}")
-                    file_counter += 1  # Increment the file counter after successful conversion
-            except IOError:
-                # This catches files that are not images or are corrupted
-                print(f"Failed to convert: {file_path}")
+                    new_img.save(output_file_path, "PNG")
+
+                    print(f"Converted and saved: {output_file_path}")
+                    file_counter += 1
+
+            except Exception as e:
+                print(f"Error processing {file}: {str(e)}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Collect and convert images to PNG format.")
