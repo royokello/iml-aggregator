@@ -17,6 +17,11 @@ def main(
     - file: gathers files in order of filenames throughout the entire directory and subdirectories
     - random: gathers files in random order
     """
+    print(f"Input directory: {input_dir}")
+    print(f"Output directory: {output_dir}")
+    print(f"Resolution: {resolution}")
+    print(f"Mode: {mode}")
+
     # Create the output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
 
@@ -28,7 +33,7 @@ def main(
                 image_files.append(os.path.join(root, file))
 
     if mode == "file":
-        image_files.sort()
+        image_files.sort(key=lambda x: os.path.basename(x).lower())
     elif mode == "random":
         random.shuffle(image_files)
     # "folder" mode keeps the default order from os.walk
