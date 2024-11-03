@@ -49,17 +49,32 @@ def main(
                     img = img.convert('RGB')
                     
                 if resolution:
-                    # Resize the image to fit within the resolution while maintaining aspect ratio
-                    img.thumbnail((resolution, resolution), Image.Resampling.LANCZOS)  # type: ignore
+                    original_width, original_height = img.size
+
+                    # Determine orientation
+                    if original_width > original_height:
+                        # Landscape orientation
+                        new_width = resolution
+                        new_height = round(original_height * (resolution / original_width))
+                    elif original_height > original_width:
+                        # Portrait orientation
+                        new_height = resolution
+                        new_width = round(original_width * (resolution / original_height))
+                    else:
+                        # Square image
+                        new_width, new_height = resolution, resolution
+
+                    # Resize the image while maintaining aspect ratio
+                    resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
                     # Create a new square image with white background
                     new_img = Image.new('RGB', (resolution, resolution), (255, 255, 255))
 
-                    # Calculate position to paste the original image
-                    paste_position = ((resolution - img.width) // 2, (resolution - img.height) // 2)
+                    # Calculate position to paste the resized image onto the white canvas
+                    paste_x = (resolution - new_width) // 2
+                    paste_y = (resolution - new_height) // 2
 
-                    # Paste the original image onto the new square image
-                    new_img.paste(img, paste_position)
+                    new_img.paste(resized_img, (paste_x, paste_y))
                 else:
                     # If no resolution is provided, use the original image
                     new_img = img
